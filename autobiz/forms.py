@@ -2,10 +2,10 @@
 
 from django.contrib.auth.forms import UserChangeForm, UserCreationForm
 from django import forms
-from .models import CustomUser
+from .models import Members
 
 # to create custom user
-class CustomUserCreationForm(UserCreationForm):
+class MemberCreationForm(UserCreationForm):
     username = forms.CharField()
     password1 = forms.CharField(widget=forms.PasswordInput, label="Password", help_text="min_lenght-8 mix characters [i.e musa1234] ",)
     password2 = forms.CharField(widget=forms.PasswordInput, help_text="Enter same password as before", label="Confirm Password",)
@@ -29,7 +29,7 @@ class CustomUserCreationForm(UserCreationForm):
     )
 
     class Meta(UserCreationForm.Meta):
-        model = CustomUser
+        model = Members
         fields = (
             "FullName",
             "username",

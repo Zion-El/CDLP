@@ -9,7 +9,7 @@ from django import forms
 from django.shortcuts import get_object_or_404, redirect, render
 from django.template.loader import get_template
 from django.urls import reverse_lazy
-from django.contrib.auth.forms import UserChangeForm, UserCreationForm
+from .forms import MemberCreationForm
 
 # Create your views here.
 
@@ -18,7 +18,7 @@ from django.contrib.auth.forms import UserChangeForm, UserCreationForm
 
 # HANDLING SIGNUP
 class SignUp(SuccessMessageMixin, generic.CreateView):
-    form_class = CustomUserCreationForm
+    form_class =MemberCreationForm
     success_url = reverse_lazy("login")
     template_name = "signup.html"
     # success_messages = 'Please confirm your email address to complete the registration,activation link has been sent to your email, also check your email spam folder'
