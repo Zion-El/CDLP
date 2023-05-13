@@ -8,7 +8,7 @@ from django.views import generic
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse_lazy
 
-from core.serializers import MemberSignUpSerialization
+from core.serializers import RegisterSerializer
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from core.models import Member
@@ -21,7 +21,7 @@ from rest_framework import generics
 # HANDLING SIGNUP
 class SignUp(APIView):
     def post(self, request, *args, **kwargs):
-        serializer = MemberSignUpSerialization(data=request.data)
+        serializer = RegisterSerializer(data=request.data)
         if serializer.is_valid():
             member = serializer.save()
             response_data = {
@@ -41,7 +41,7 @@ class SignUp(APIView):
         
 
     # def post(self, request, *args, **kwargs):
-    #     serializer = MemberSignUpSerialization(data = request.data)
+    #     serializer = RegisterSerializer(data = request.data)
     #     if serializer.is_valid():
     #         serializer.save()
     #         return Response(serializer.data)
