@@ -17,8 +17,8 @@ class RegisterSerializer(serializers.Serializer):
         try:
             password_validation.validate_password(value, None)
         except Exception as e:
-            raise serializers.ValidationError(
                 # raises an error and state the exception met as message
+            raise serializers.ValidationError(
                 {"message": e, "status": False},
             )
 
