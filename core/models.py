@@ -2,6 +2,10 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser
 
 
+
+# from users.models import User
+
+
 # USER BANKS
 Bank = (
     ("Access Bank", "Access Bank"),
@@ -82,3 +86,14 @@ class Member(AbstractUser):
 
     def __str__(self):
         return self.username
+
+
+class APIModel(models.Model):
+    api_key = models.CharField(max_length=50)
+    referral_code = models.CharField(max_length=6)
+    user = models.OneToOneField(Member, on_delete=models.CASCADE)
+    create_at = models.DateTimeField(auto_now_add=True)
+
+
+    def __str__(self):
+        return self.user.username

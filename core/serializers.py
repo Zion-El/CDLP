@@ -23,6 +23,8 @@ class RegisterSerializer(serializers.Serializer):
             )
 
         return value
+    
+
 
     def save(self, **kwargs):
         try:
@@ -36,6 +38,8 @@ class RegisterSerializer(serializers.Serializer):
             )
 
         return user
+    
+
 
 
 class LoginSerializer(serializers.Serializer):

@@ -12,10 +12,8 @@ from rest_framework_simplejwt.serializers import (
     TokenRefreshSerializer,
 )
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
-
 from .serializers import LoginSerializer, RegisterSerializer
 
-# Create your views here.
 
 
 class RegisterView(GenericAPIView):
@@ -33,6 +31,7 @@ class RegisterView(GenericAPIView):
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
+
         # line 34 & 35 can also be written as
         # if serializer.is_valid():
             # serializer.save()
@@ -44,6 +43,7 @@ class RegisterView(GenericAPIView):
             },
             status=status.HTTP_201_CREATED,
         )
+    
 
 
 class LoginView(TokenObtainPairView):
@@ -97,7 +97,8 @@ class LoginView(TokenObtainPairView):
         #             status=status.HTTP_401_UNAUTHORIZED,
         #     )
 
-        request.data["username"] = username__email
+        
+        # request.data["username"] = username__email
         tokens = super().post(request)
         return Response(
             {
