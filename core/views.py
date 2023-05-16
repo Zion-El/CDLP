@@ -99,7 +99,9 @@ class LoginView(TokenObtainPairView):
         #     )
 
         
-        # request.data["username"] = username__email
+        request.data["username"] = username__email
+
+
         tokens = super().post(request)
         return Response(
             {
