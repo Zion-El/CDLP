@@ -1,21 +1,28 @@
-from django.contrib.auth import authenticate, get_user_model 
+from rest_framework_simplejwt.tokens import RefreshToken
+from django.contrib.auth import authenticate, get_user_model
+from django.contrib.auth.hashers import check_password
+
 # TO RAISE VALIDATION ERROR
 from django.core.exceptions import ValidationError
+
 # TO VALIDATE THE EMAIL
 from django.core.validators import validate_email
+
 # from django.shortcuts import render
 from rest_framework import status
 from rest_framework.generics import GenericAPIView, UpdateAPIView
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework_simplejwt.serializers import (
     TokenObtainPairSerializer,
     TokenRefreshSerializer,
-)
+) 
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
+
 from .serializers import *
-from rest_framework.permissions import IsAuthenticated
-from django.contrib.auth.hashers import check_password
+
 # import requests
+
 
 class RegisterView(GenericAPIView):
     """
@@ -29,13 +36,15 @@ class RegisterView(GenericAPIView):
     serializer_class = RegisterSerializer
 
     def post(self, request):
-        serializer = self.serializer_class(data=request.data, context={'request': request})
+        serializer = self.serializer_class(
+            data=request.data, context={"request": request}
+        )
         serializer.is_valid(raise_exception=True)
         serializer.save()
 
         # line 34 & 35 can also be written as
         # if serializer.is_valid():
-            # serializer.save()
+        # serializer.save()
 
         return Response(
             {
@@ -44,10 +53,12 @@ class RegisterView(GenericAPIView):
             },
             status=status.HTTP_201_CREATED,
         )
-    
 
 
-class LoginView(TokenObtainPairView):
+from django.http import HttpRequest
+
+
+class LoginView(GenericAPIView):
     """
     Login with either Username or Email & Password to get Authentication tokens
 
@@ -64,10 +75,10 @@ class LoginView(TokenObtainPairView):
         user: user profile details
     """
 
-    serializer_class = TokenObtainPairSerializer
+    serializer_class = LoginSerializer
 
-    def post(self, request, **kwargs):
-        serializer = LoginSerializer(data=request.data)
+    def post(self, request: HttpRequest, **kwargs):
+        serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
 
         # This could be a username or email
@@ -98,16 +109,17 @@ class LoginView(TokenObtainPairView):
         #             status=status.HTTP_401_UNAUTHORIZED,
         #     )
 
-        
-        request.data["username"] = username__email
 
+        refresh = RefreshToken.for_user(user)
 
-        tokens = super().post(request)
         return Response(
             {
                 "status": True,
                 "message": "Logged in successfully",
-                "tokens": tokens.data,
+                "tokens": {
+                    "access": str(refresh.access_token),
+                    "refresh": str(refresh),
+                },
                 "user": {
                     "id": user.id,
                     "username": user.username,
@@ -116,6 +128,13 @@ class LoginView(TokenObtainPairView):
             },
             status=status.HTTP_200_OK,
         )
+
+
+# @api_view()
+# def change_value(request, username__email):
+#     request.data['username'] = username__email
+
+#     return Response()
 
 
 class RefreshView(TokenRefreshView):
@@ -138,25 +157,23 @@ class RefreshView(TokenRefreshView):
         return Response(
             {"access": access_token, "status": True}, status=status.HTTP_200_OK
         )
-    
 
 
 class DetailUpdateView(GenericAPIView):
-    serializer_class =  UpdateProfileSerializer
+    serializer_class = UpdateProfileSerializer
     permission_classes = [IsAuthenticated]
+
     def put(self, request, *args, **kwargs):
-        serializer = self.serializer_class(data = request.data, context= {'user' : self.request.user})
+        serializer = self.serializer_class(
+            data=request.data, context={"user": self.request.user}
+        )
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data, status=200)
-    
+
     def get_serializer_context(self):
         print(self.request.user)
-        return {
-            'user' : self.request.user
-        }
-
-
+        return {"user": self.request.user}
 
 
 # class PasswordUpdateView(UpdateAPIView):
@@ -180,3 +197,4 @@ class DetailUpdateView(GenericAPIView):
 
 #         return Response({'detail': 'Password updated successfully'})
 
+#         return Response({'detail': 'Password updated successfully'})
