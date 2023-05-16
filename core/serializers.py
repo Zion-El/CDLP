@@ -50,15 +50,15 @@ class LoginSerializer(serializers.Serializer):
 class UpdateProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = Member
-        fields = ['sex', 'BVN', 'Street', 'city', 'state', 'DOB']
+        fields = ['sex', 'BVN', 'street', 'city', 'state', 'DOB']
 
     def save(self, **kwargs):
         user = self.context.get('user')
         member = Member.objects.get(id=user.id)
-        sex, BVN, Street, city, state, DOB = self.validated_data.values()
+        sex, BVN, street, city, state, DOB = self.validated_data.values()
         member.sex = sex
         member.BVN = BVN
-        member.Street = Street
+        member.street = street
         member.city = city
         member.state = state
         member.DOB = DOB
