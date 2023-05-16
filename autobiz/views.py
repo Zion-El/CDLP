@@ -19,35 +19,35 @@ from rest_framework import generics
 # Create your views here.
 
 # HANDLING SIGNUP
-class SignUp(APIView):
-    def post(self, request, *args, **kwargs):
-        serializer = RegisterSerializer(data=request.data)
-        if serializer.is_valid():
-            member = serializer.save()
-            response_data = {
-                'first_name': member.first_name,
-                'last_name': member.last_name,
-                'email': member.email,
-                'phone': member.phone,
-                'username': member.username
-            }
-            return Response(serializer.data, content_type='application/json')
-        else:
-            return Response(serializer.errors, status=400)
+# class SignUp(APIView):
+#     def post(self, request, *args, **kwargs):
+#         serializer = RegisterSerializer(data=request.data)
+#         if serializer.is_valid():
+#             member = serializer.save()
+#             response_data = {
+#                 'first_name': member.first_name,
+#                 'last_name': member.last_name,
+#                 'email': member.email,
+#                 'phone': member.phone,
+#                 'username': member.username
+#             }
+#             return Response(serializer.data, content_type='application/json')
+#         else:
+#             return Response(serializer.errors, status=400)
         
 
-    def get(self, request, *args, **kwargs):
-        return Response("Hello, world!")
+#     def get(self, request, *args, **kwargs):
+#         return Response("Hello, world!")
         
 
-    # def post(self, request, *args, **kwargs):
-    #     serializer = RegisterSerializer(data = request.data)
-    #     if serializer.is_valid():
-    #         serializer.save()
-    #         return Response(serializer.data)
-    #     return Response(serializer.errors)
+#     # def post(self, request, *args, **kwargs):
+#     #     serializer = RegisterSerializer(data = request.data)
+#     #     if serializer.is_valid():
+#     #         serializer.save()
+#     #         return Response(serializer.data)
+#     #     return Response(serializer.errors)
 
 
-class Login(APIView):
-    def post(self, request, *arg, **kwargs):
-        pass
+# class Login(APIView):
+#     def post(self, request, *arg, **kwargs):
+#         pass

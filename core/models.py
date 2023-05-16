@@ -37,13 +37,16 @@ user_type = (
     ("API", "API"),
 )
 
-
+sex = (
+    ('M', 'male'),
+    ('F','female')
+)
 # Create your models here.
 class Member(AbstractUser):
     UserCode = models.CharField(max_length=200, null=True)
     email = models.EmailField(max_length=100, unique=True) 
     salt = models.CharField(max_length=200, null=True)
-    sex = models.CharField(max_length=6, null=True,)
+    sex = models.CharField(choices=sex,  max_length=6, null=True,)
     phone = models.CharField(max_length=30, blank=True)
     Street = models.CharField(max_length=100, null=True,)
     city = models.CharField(max_length=200, null=True)

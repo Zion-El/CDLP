@@ -5,16 +5,17 @@ from django.core.exceptions import ValidationError
 from django.core.validators import validate_email
 # from django.shortcuts import render
 from rest_framework import status
-from rest_framework.generics import GenericAPIView
+from rest_framework.generics import GenericAPIView, UpdateAPIView
 from rest_framework.response import Response
 from rest_framework_simplejwt.serializers import (
     TokenObtainPairSerializer,
     TokenRefreshSerializer,
 )
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
-from .serializers import LoginSerializer, RegisterSerializer
-
-
+from .serializers import *
+from rest_framework.permissions import IsAuthenticated
+from django.contrib.auth.hashers import check_password
+# import requests
 
 class RegisterView(GenericAPIView):
     """
@@ -28,7 +29,7 @@ class RegisterView(GenericAPIView):
     serializer_class = RegisterSerializer
 
     def post(self, request):
-        serializer = self.serializer_class(data=request.data)
+        serializer = self.serializer_class(data=request.data, context={'request': request})
         serializer.is_valid(raise_exception=True)
         serializer.save()
 
@@ -135,3 +136,45 @@ class RefreshView(TokenRefreshView):
         return Response(
             {"access": access_token, "status": True}, status=status.HTTP_200_OK
         )
+    
+
+
+class DetailUpdateView(GenericAPIView):
+    serializer_class =  UpdateProfileSerializer
+    permission_classes = [IsAuthenticated]
+    def put(self, request, *args, **kwargs):
+        serializer = self.serializer_class(data = request.data, context= {'user' : self.request.user})
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data, status=200)
+    
+    def get_serializer_context(self):
+        print(self.request.user)
+        return {
+            'user' : self.request.user
+        }
+
+
+
+
+# class PasswordUpdateView(UpdateAPIView):
+#     queryset = Member.objects.all()
+#     serializer_class = PasswordUpdateSerializer
+#     permission_classes = [IsAuthenticated]
+
+#     def update(self, request, *args, **kwargs):
+#         user = self.get_object()
+#         serializer = self.get_serializer(data=request.data)
+#         serializer.is_valid(raise_exception=True)
+
+#         old_password = serializer.validated_data.get('old_password')
+#         new_password = serializer.validated_data.get('new_password')
+
+#         if not check_password(old_password, user.password):
+#             return Response({'detail': 'Invalid old password'}, status=400)
+
+#         user.set_password(new_password)
+#         user.save()
+
+#         return Response({'detail': 'Password updated successfully'})
+
