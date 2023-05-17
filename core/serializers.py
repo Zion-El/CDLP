@@ -82,14 +82,14 @@ class UpdateProfileSerializer(serializers.ModelSerializer):
     def save(self, **kwargs):
         user = self.context.get('user')
         member = Member.objects.get(id=user.id)
-        sex, BVN, street, city, state, DOB = self.validated_data.values()
-        member.sex = sex
-        member.BVN = BVN
-        member.street = street
-        member.city = city
-        member.state = state
-        member.DOB = DOB
+        for attr, value in self.validated_data.items():
+            setattr(member, attr, value)
+
+        member.save()
         return member
+    
+    
+        
 
 
 class PasswordUpdateSerializer(serializers.Serializer):
