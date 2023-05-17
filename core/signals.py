@@ -5,7 +5,7 @@ from django.dispatch import receiver
 from .models import Member, APIModel
 from hashlib import sha256
 
-# @receiver(post_save, sender=Member)
+@receiver(post_save, sender=Member)
 def generate_api_key_and_referral_code(sender, instance, created, **kwargs):
     if created:
         # Generate a unique API key

@@ -9,7 +9,7 @@ from django.contrib.auth.models import AbstractUser
 # USER BANKS
 Bank = (
     ("Access Bank", "Access Bank"),
-    ("Access(Diamond) Bank", "Access (Diamond) Bank"),
+    ("Access(Diamond) Bank", "Access (Diamond) Bank"),                                                                                                                                                                                                                                                                                                                                                                                                                                                                
     ("ECO Bank", "ECO Bank"),
     ("First Bank of Nigeria", "First Bank of Nigeria"),
     ("FCMBank", "FCMBank"),

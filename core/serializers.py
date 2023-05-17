@@ -1,7 +1,11 @@
-from django.contrib.auth import get_user_model, password_validation
+from django.contrib.auth import get_user_model, password_validation, authenticate
 from django.db.utils import IntegrityError
 from rest_framework import serializers
 from .models import Member
+ 
+from django.contrib.auth.validators import UnicodeUsernameValidator
+from django.core.exceptions import ValidationError
+
 
 
 class RegisterSerializer(serializers.Serializer):
@@ -45,6 +49,29 @@ class LoginSerializer(serializers.Serializer):
     username = serializers.CharField()
     password = serializers.CharField()
 
+    def validate(self, data):
+        email_or_username = data.get('email_or_username')
+        password = data.get('password')
+
+        # Determine if the provided data is an email or username
+        is_email = False
+        try:
+            UnicodeUsernameValidator().validate(email_or_username)
+        except ValidationError:
+            is_email = True
+
+        # Authenticate the user using email or username
+        user = None
+        if is_email:
+            user = authenticate(request=self.context.get('request'), email=email_or_username, password=password)
+        else:
+            user = authenticate(request=self.context.get('request'), username=email_or_username, password=password)
+
+        if not user:
+            raise serializers.ValidationError("Email/Username or password is incorrect")
+
+        data['user'] = user
+        return data
 
 
 class UpdateProfileSerializer(serializers.ModelSerializer):

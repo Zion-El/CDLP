@@ -26,6 +26,9 @@ from django.urls import reverse
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
 
+from django.http import QueryDict
+
+
 
 
 class RegisterView(GenericAPIView):
@@ -80,15 +83,14 @@ class RegisterView(GenericAPIView):
 
 
 class ConfirmationView(GenericAPIView):
+    serializer_class = LoginSerializer
+
     @csrf_exempt
     def post(self, request, user_id):
-        user = User.objects.get(pk=user_id)
+        user = Member.objects.get(pk=user_id)
         user.is_active = True
         user.save()
         return JsonResponse({'message': 'Registration confirmed! You can now log in.'})
-
-
-
 
 
 
@@ -129,6 +131,8 @@ class LoginView(TokenObtainPairView):
 
         except (get_user_model().DoesNotExist, ValidationError):
             pass
+        
+        serializer.validated_data["username"] = username__email
 
         user = authenticate(request, username=username__email, password=password)
 
@@ -143,9 +147,8 @@ class LoginView(TokenObtainPairView):
         #             {"message": "You must verify your email first", "status": False},
         #             status=status.HTTP_401_UNAUTHORIZED,
         #     )
-
-        
-        request.data["username"] = username__email
+   
+        # request.data["username"] = username__email
 
 
         tokens = super().post(request)
