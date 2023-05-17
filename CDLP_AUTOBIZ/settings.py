@@ -115,8 +115,8 @@ DATABASES = {
     },
     
     #? Local MySQL instance
-    #  
-    # 'default1': {
+     
+    # 'default': {
     #     'ENGINE': 'django.db.backends.mysql',
     #     'NAME': 'autobiz',
     #     'USER': "root",
@@ -190,6 +190,7 @@ SIMPLE_JWT = {
     "AUTH_HEADER_TYPES": ("Bearer",),
     "ACCESS_TOKEN_LIFETIME": timedelta(days=5),
     "AUTH_TOKEN_CLASSES": ("rest_framework_simplejwt.tokens.AccessToken",),
+    "USER_ID_FIELD": "userid",
 }
 
 

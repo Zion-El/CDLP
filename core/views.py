@@ -1,36 +1,24 @@
-from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth import authenticate, get_user_model
-from django.contrib.auth.hashers import check_password
-
-# TO RAISE VALIDATION ERROR
+from django.contrib.auth.signals import user_logged_in
 from django.core.exceptions import ValidationError
-
-# TO VALIDATE THE EMAIL
+from django.core.mail import send_mail
 from django.core.validators import validate_email
 
-# from django.shortcuts import render
+from django.http import HttpRequest
+from django.urls import reverse
+from django.views.decorators.csrf import csrf_exempt
+
 from rest_framework import status
-from rest_framework.generics import GenericAPIView, UpdateAPIView
+from rest_framework.generics import GenericAPIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework_simplejwt.serializers import (
-    TokenObtainPairSerializer,
     TokenRefreshSerializer,
-) 
-from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
+)
+from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.views import TokenRefreshView
 
 from .serializers import *
-
-# import requests
-from django.http import HttpRequest
-from django.core.mail import send_mail
-from django.contrib.auth.models import User
-from django.shortcuts import render
-from django.urls import reverse
-from django.views.decorators.csrf import csrf_exempt
-from django.http import JsonResponse
-from django.http import QueryDict
-
 
 
 class RegisterView(GenericAPIView):
@@ -43,7 +31,7 @@ class RegisterView(GenericAPIView):
     """
 
     serializer_class = RegisterSerializer
-    
+
     @csrf_exempt
     def post(self, request):
         serializer = self.serializer_class(
@@ -52,14 +40,15 @@ class RegisterView(GenericAPIView):
         serializer.is_valid(raise_exception=True)
         user = serializer.save()
 
-
         # Generate confirmation link
-        confirmation_link = request.build_absolute_uri(reverse('confirm_registration', args=[user.id]))
+        confirmation_link = request.build_absolute_uri(
+            reverse("confirm_registration", args=[user.id])
+        )
 
         # Send confirmation email
         send_mail(
-            'Account Confirmation',
-            f'''Welcome {user.username}!
+            "Account Confirmation",
+            f"""Welcome {user.username}!
 
             Thank you for creating an account on Autobiz
             
@@ -67,9 +56,9 @@ class RegisterView(GenericAPIView):
             
             {confirmation_link}
             
-            Thank You.''',
-            'mchladelola@gmail.com',
-            [serializer.validated_data['email']],
+            Thank You.""",
+            "mchladelola@gmail.com",
+            [serializer.validated_data["email"]],
             fail_silently=False,
         )
         # line 34 & 35 can also be written as
@@ -84,6 +73,7 @@ class RegisterView(GenericAPIView):
             status=status.HTTP_201_CREATED,
         )
 
+
 class ConfirmationView(GenericAPIView):
     serializer_class = LoginSerializer
 
@@ -92,8 +82,7 @@ class ConfirmationView(GenericAPIView):
         user = Member.objects.get(pk=user_id)
         user.is_active = True
         user.save()
-        return JsonResponse({'message': 'Registration confirmed! You can now log in.'})
-
+        return Response({"message": "Registration confirmed! You can now log in."}, status=status.HTTP_200_OK)
 
 
 class LoginView(GenericAPIView):
@@ -132,7 +121,7 @@ class LoginView(GenericAPIView):
 
         except (get_user_model().DoesNotExist, ValidationError):
             pass
-        
+
         serializer.validated_data["username"] = username__email
 
         user = authenticate(request, username=username__email, password=password)
@@ -149,8 +138,9 @@ class LoginView(GenericAPIView):
         #             status=status.HTTP_401_UNAUTHORIZED,
         #     )
 
-
         refresh = RefreshToken.for_user(user)
+
+        user_logged_in.send_robust(get_user_model(), user=user)
 
         return Response(
             {
@@ -161,15 +151,13 @@ class LoginView(GenericAPIView):
                     "refresh": str(refresh),
                 },
                 "user": {
-                    "id": user.id,
+                    "id": user.pk,
                     "username": user.username,
                     "email": user.email,
                 },
             },
             status=status.HTTP_200_OK,
         )
-
-
 
 
 class RefreshView(TokenRefreshView):
@@ -206,9 +194,6 @@ class DetailUpdateView(GenericAPIView):
         serializer.save()
         return Response(serializer.data, status=200)
 
-    def get_serializer_context(self):
-        print(self.request.user)
-        return {"user": self.request.user}
 
 
 # class PasswordUpdateView(UpdateAPIView):
