@@ -2,6 +2,8 @@ from django.contrib.auth import get_user_model, password_validation
 from django.db.utils import IntegrityError
 from rest_framework import serializers
 from .models import Member
+from .utils import Google, register_social_user
+from decouple import config
  
 
 
@@ -68,5 +70,43 @@ class UpdateProfileSerializer(serializers.ModelSerializer):
 
 class PasswordUpdateSerializer(serializers.Serializer):
     old_password = serializers.CharField()
-    confirm_old_password = serializers.CharField()
-    new_password = serializers.CharField()
+    password1 = serializers.CharField()
+    password2 = serializers.CharField()
+
+    def validate(self, attrs):
+        if not attrs["password1"] == attrs["password2"]:
+            raise serializers.ValidationError(
+                    detail={"message": "The two password fields didn’t match.", "status": False}
+            )
+        
+        user = self.context['user']
+
+        if not user.check_password(attrs['old_password']):
+            raise serializers.ValidationError(
+                {"message": "Invalid old password"}
+            )
+
+        return super().validate(attrs)
+
+
+class GoogleSocialAuthSerializer(serializers.Serializer):
+    auth_token = serializers.CharField()
+
+    def validate(self, data):
+        auth_token = data.get("auth_token")
+        user_data = Google.validate(auth_token)
+
+        try:
+            user_data["sub"]
+        except Exception as identifier:
+            raise serializers.ValidationError({"message": str(identifier), "status": False})
+
+        if user_data["aud"] != config("GOOGLE_CLIENT_ID"):
+            raise serializers.ValidationError(
+                    {"message": "Invalid credentials", "status": False}
+            )
+
+        email = user_data["email"]
+        name = user_data["name"]
+
+        return register_social_user(email=email, name=name)
